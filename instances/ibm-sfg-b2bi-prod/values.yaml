@@ -134,6 +134,12 @@ ibm-sfg-prod:
           targetPort: soassl
           nodePort: 30003
           protocol: TCP
+        scc:
+          name: scc
+          port: 35040
+          targetPort: scc
+          nodePort: 35040
+          protocol: TCP
       extraPorts: []
         #-name: http-1
         # port: 46000
