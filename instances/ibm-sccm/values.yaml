@@ -46,10 +46,10 @@ ibm-sccm:
       name: "web-console-secure"
       port: 58083
       protocol: "TCP"
-    SCCInteropService:
-      name: "SCCInteropService"
-      port: 50040
-      protocol: "TCP"
+    # SCCInteropService:
+    #   name: "SCCInteropService"
+    #   port: 50040
+    #   protocol: "TCP"
     externalIP: ""
     # Specify this to set annotations 
     annotations: {}
