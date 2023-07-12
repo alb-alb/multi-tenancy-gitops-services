@@ -10,7 +10,7 @@ metadata:
     release: cd-63
     author: IBM
   namespace: scd
-annotations:
+  annotations:
     argocd.argoproj.io/sync-wave: "250"
 spec:
   replicas: 1
