@@ -2,4 +2,4 @@ resources:
 - secrets/cd-secret.yaml
 - secrets/cd-cert-secret.yaml
 - network/cd-network-policy.yaml
-- job/cd-job.yaml
+# - job/cd-job.yaml
