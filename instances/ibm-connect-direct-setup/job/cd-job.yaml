@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: cd-63-ibm-connect-direct-preupgrade
+  annotations:
+    argocd.argoproj.io/sync-wave: "225"
   labels:
     app.kubernetes.io/name: ibm-connect-direct
     app.kubernetes.io/instance: cd-63
