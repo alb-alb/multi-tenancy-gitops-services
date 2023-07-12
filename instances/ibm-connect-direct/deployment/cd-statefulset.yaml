@@ -1,44 +1,48 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: cd-63-ibm-connect-direct-preupgrade
+  name: cd-63-ibm-connect-direct
   labels:
     app.kubernetes.io/name: ibm-connect-direct
     app.kubernetes.io/instance: cd-63
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: ibm-connect-direct-1.3.0
     release: cd-63
-  annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "2"
-    "helm.sh/hook-delete-policy": hook-succeeded
-    argocd.argoproj.io/sync-wave: "225"
+    author: IBM
   namespace: scd
+annotations:
+    argocd.argoproj.io/sync-wave: "250"
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ibm-connect-direct
+      app.kubernetes.io/instance: cd-63
+      author: IBM
+  serviceName: cd-63-ibm-connect-direct
   template:
     metadata:
-      name: "cd-63"
       labels:
-        app.kubernetes.io/name: ibm-connect-direct-preupgrade
-        app.kubernetes.io/instance: cd-63-preupgrade
-        app.kubernetes.io/managed-by: Helm-preupgrade
-        helm.sh/chart: ibm-connect-direct-1.3.0-preupgrade
-        release: cd-63-preupgrade
-      annotations:        
+        app.kubernetes.io/name: ibm-connect-direct
+        app.kubernetes.io/instance: cd-63
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: ibm-connect-direct-1.3.0
+        release: cd-63
+        author: IBM
+      annotations:
+        license: "true"        
         productID: "0e99fe73c7ae4b799e11d00a9bbf0db0"
         productName: "IBM Sterling Connect Direct Premium Ed Certified Container"
         productVersion: "6.3"
         productMetric: "VIRTUAL_PROCESSOR_CORE"
         productChargedContainers: "All"
         checksum/config: 80b9b979da2ffb9befc945d0fd52bb459298068f14b2be3ee747e8f6d7dc3a60
-
     spec:
       serviceAccountName: cd-63-ibm-connect-direct-serviceaccount
-      restartPolicy: Never
       hostNetwork: false
       hostPID: false
       hostIPC: false
-      securityContext:
+      securityContext: 
         
         fsGroup: 45678
         runAsGroup: 45678
@@ -61,15 +65,32 @@ spec:
           preferredDuringSchedulingIgnoredDuringExecution:        
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:  
-          preferredDuringSchedulingIgnoredDuringExecution:
+          preferredDuringSchedulingIgnoredDuringExecution: 
       containers:
-        - name: pre-upgrade-job
+        - name: cd-63-ibm-connect-direct
           image: "cp.icr.io/cp/ibm-connectdirect/cdu6.3_certified_container_6.3.0.0:6.3.0.0_ifix000"
           imagePullPolicy: IfNotPresent
           env:
+            - name: CD_License_Acceptance
+              value: "true"
             - name: TZ
               value: UTC
-          command: ["/cdinstall/maintenance.sh", "upgrade"]
+            # LDAP configuration
+            - name: SACL_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: cd-63-ibm-connect-direct
+                  key: saclConfig
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: cd-63-ibm-connect-direct
+                  resource: requests.cpu
+            - name: LICENSE_TYPE
+              value: "prod"
+          ports:
+          # Map the configuration directory from inside the container to the
+          # persistent volume claims
           volumeMounts:
             - mountPath: /opt/cdunix/ndm/cfg
               name: cd-vol
@@ -93,24 +114,23 @@ spec:
             - mountPath: /opt/cdunix/file_agent/log
               name: cd-vol
               subPath: FALOG
+          # CD Configurations using dynamic or non-dynamic prov
+            - mountPath: /opt/cdfiles/cdcert 
+              name: cd-cert-secret
+              readOnly: true 
             - mountPath: /opt/cdfiles/cd_param_file
               name: cd-param
               subPath: cd_param_file
+              readOnly: true
             - mountPath: /opt/cdfiles/secret_files
               name: cd-secret
               readOnly: true
+# Extra Volume Mounts
             - mountPath: /opt/backup
               name: cd-vol
               subPath: BACKUP
-          resources:
-            limits:
-              cpu: 500m
-              ephemeral-storage: 5Gi
-              memory: 2000Mi
-            requests:
-              cpu: 500m
-              ephemeral-storage: 3Gi
-              memory: 2000Mi
+
+          # Add the required linux capabilities
           securityContext:
             
             allowPrivilegeEscalation: true
@@ -125,13 +145,66 @@ spec:
             privileged: false
             readOnlyRootFilesystem: false
             runAsUser: 45678
+
+          # Set startup probe to determine if Connect Direct has completed startup procedure
+          startupProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - /cdinstall/cdmonitor.sh 1363
+          # Set liveness probe to determine if Connect Direct is running
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - /cdinstall/cdmonitor.sh 1363
+          # Set readiness probe to determine if Connect Direct is running
+          readinessProbe: 
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - /cdinstall/cdmonitor.sh 1363
+          resources:
+            limits:
+              cpu: 500m
+              ephemeral-storage: 5Gi
+              memory: 2000Mi
+            requests:
+              cpu: 500m
+              ephemeral-storage: 3Gi
+              memory: 2000Mi
+          
+      # Create a volume which will be used while creating the container.
+      # The volume claim needs to be created before using this volume.
       volumes:
       - name: cd-vol
         persistentVolumeClaim:
           claimName: cd-63-ibm-connect-direct-pvc
-      - name: cd-param
+      - name: cd-param 
         configMap:
           name: cd-63-ibm-connect-direct
+          defaultMode: 292
       - name: cd-secret
-        secret:
+        secret: 
           secretName: cd-secret
+          defaultMode: 292
+      - name: cd-cert-secret
+        secret:
+          secretName: cd-cert-secret
+          defaultMode: 292
+# Extra Volumes
