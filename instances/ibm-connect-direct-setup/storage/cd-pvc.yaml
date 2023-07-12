@@ -1,6 +1,8 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "210"
   name: cd-63-ibm-connect-direct-pvc
   labels:
     app.kubernetes.io/name: ibm-connect-direct

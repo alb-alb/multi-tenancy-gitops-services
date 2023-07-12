@@ -3,7 +3,7 @@ kind: NetworkPolicy
 metadata:
   name: cd-63-ibm-connect-direct
   annotations:
-    argocd.argoproj.io/sync-wave: "210"
+    argocd.argoproj.io/sync-wave: "209"
   labels:
     app.kubernetes.io/name: ibm-connect-direct
     app.kubernetes.io/instance: cd-63
