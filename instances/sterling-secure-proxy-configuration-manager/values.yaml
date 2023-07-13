@@ -45,7 +45,7 @@ ibm-ssp-cm:
     # enabled is whether to use Persistent Volumes or not
     enabled: true
     # useDynamicProvisioning is whether or not to use Storage Classes to dynamically create Persistent Volumes
-    useDynamicProvisioning: false
+    useDynamicProvisioning: true
     # Specify the existing PV claim name to be used for deployment
     existingClaimName: "ssp-cm-pvc"
     # Specify this to use selector label name for PV-PVC bind
@@ -53,7 +53,7 @@ ibm-ssp-cm:
     # Specify this to use selector label value for PV-PVC bind
     labelValue: "ibm-ssp-cm-pvc"
     # Specify this to set storage class name
-    storageClassName: "manual"
+    storageClassName: "ibmc-file-gold-gid"
     # Specify this to set PVC size
     size: 2Gi
     # Specify this to set access mode
@@ -61,7 +61,7 @@ ibm-ssp-cm:
 
   # Manage PV directory using Supplemental Group ID if needed.
   storageSecurity:
-    supplementalGroupId: ""
+    supplementalGroupId: "45678"
 
   # Specify these fields for Services
   service:
