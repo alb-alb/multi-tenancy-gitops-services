@@ -20,7 +20,7 @@ ibm-ssp-cm:
     # Specify the tag name for the image
     tag: "6.0.3.0.02"
     # Specify the image pull secret for the service, if the image is in private registry
-    imageSecrets: "ssp-imageregistrysecret"
+    imageSecrets: "ibm-entitlement-key"
     # Enable true/false to use image digest
     digest:
       enabled: false
