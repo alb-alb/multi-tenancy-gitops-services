@@ -55,8 +55,8 @@ ibm-pem-standard-vbudi:
       pullSecret: "ibm-entitlement-key"
 
   dbsetup:
-    enabled: true  #If it is first installation specify the values true
-    upgrade: false #If it is upgrade Specify the values to true
+    enabled: false  #If it is first installation specify the values true
+    upgrade: true #If it is upgrade Specify the values to true
     resources:
       requests:
         memory: "2Gi"
@@ -877,7 +877,7 @@ ibm-pem-standard-vbudi:
         capacity: 100Mi
         storageclass: slow
     nonprod:
-      enable: true #set to true to deploy non prod pcm
+      enable: false #set to true to deploy non prod pcm
       setupfile:
         acceptLicence: true #We should make accept-license should be true for pcm installation
         cm:
