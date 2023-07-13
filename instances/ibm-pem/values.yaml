@@ -100,7 +100,7 @@ ibm-pem-standard-vbudi:
       db_name: pemdb #Specify the DATABASE Name
       db_schema: DB2INST1 #Specify the Schema name
       db_user: DB2INST1 #Specify the DB username
-      db_password: db2inst1  #Specify the secret
+      db_password: ibm-pem-secret  #Specify the secret
       db_driver: com.ibm.db2.jcc.DB2Driver #Specify the corresponding driver details for oracle or DB2 or mssql depnding on the db_type that is selected. For example, for oracle, set the values of db_driver to oracle.jdbc.OracleDriver. For DB2, set com.ibm.db2.jcc.DB2Driver. For mssql, set com.microsoft.sqlserver.jdbc.SQLServerDriver.
       ## DB CONNECTION MANAGER DETAILS. COMMON FOR IBM PEM, PARTNER REPOSITORY &
       #PARTNER PROVISIONER
